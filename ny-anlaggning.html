@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+  <html lang="sv">
+  <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Ny anläggning – Prototyp</title>
+  <style>
+    :root {
+      --navy: #12233D;
+    --navy-dark: #0B192E;
+    --amber: #F0A202;
+          --bg: #F4F5F3;
+          --text: #181D26;
+    --text-muted: #727A87;
+    --text-faint: #9AA2AF;
+    --border: rgba(0,0,0,0.06);
+}
+  * { box-sizing: border-box; }
+  body {
+        margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+  .header {
+        background: var(--navy);
+    color: white;
+    padding: 18px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+  .back-btn {
+        background: none;
+    border: none;
+    color: white;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+}
+  .header h1 {
+        font-size: 17px;
+    font-weight: 600;
+    margin: 0;
+}
+
+  main {
+        padding: 16px 16px 32px;
+        max-width: 520px;
+    margin: 0 auto;
+}
+
+  .card {
+        background: white;
+    border-radius: 16px;
+    padding: 14px 16px 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid var(--border);
+    margin-bottom: 14px;
+}
+
+  .section-label {
+        font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin: 0 0 10px;
+}
+
+  .section-note {
+        font-size: 12px;
+    color: var(--text-faint);
+    margin: -6px 0 10px;
+    line-height: 1.4;
+}
+
+  .form-group { margin-bottom: 14px; }
+  .form-group label {
+        font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+  .required-dot {
+        color: var(--amber);
+    font-size: 15px;
+    line-height: 0;
+}
+  .form-group input {
+        width: 100%;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 12px;
+    padding: 11px 14px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--text);
+}
+  .form-group input::placeholder { color: #C4C9D1; }
+      .form-group input:focus {
+        outline: none;
+    box-shadow: 0 0 0 2px var(--amber);
+    border-color: var(--amber);
+}
+  .form-group input.invalid {
+    border-color: #E1483F;
+          box-shadow: 0 0 0 1px #E1483F;
+      }
+  .error-text {
+          font-size: 12px;
+    color: #E1483F;
+        margin: 5px 0 0;
+    display: none;
+  }
+  .error-text.show { display: block; }
+
+  .form-row { display: flex; gap: 12px; }
+  .form-row .form-group { flex: 1; }
+
+      .unit-wrap { position: relative; }
+  .unit-wrap input { padding-right: 44px; }
+  .unit-label {
+        position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+    color: var(--text-faint);
+    pointer-events: none;
+}
+
+  .prefill-note {
+        display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    color: #8A9A6E;
+    background: #F0F5E8;
+        padding: 6px 10px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+  .toggle-group {
+        display: flex;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+  .toggle-btn {
+        flex: 1;
+    padding: 11px 8px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.12);
+    background: white;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-align: left;
+}
+  .toggle-btn .toggle-title { display: block; color: var(--text); font-size: 13.5px; margin-bottom: 2px; }
+  .toggle-btn .toggle-desc { display: block; font-size: 11.5px; color: var(--text-faint); font-weight: 400; line-height: 1.3; }
+  .toggle-btn.active {
+    border-color: var(--amber);
+    background: #FFF8EA;
+    }
+  .toggle-btn.active .toggle-title { color: var(--navy); }
+
+  .save-bar {
+        margin-top: 4px;
+}
+  .save-bar-inner { max-width: 520px; margin: 0 auto; }
+  .btn-save {
+        width: 100%;
+    background: var(--amber);
+    color: var(--navy);
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+}
+  .btn-save:active { transform: scale(0.98); }
+</style>
+  </head>
+  <body>
+
+  <div class="header">
+    <button class="back-btn" aria-label="Tillbaka">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <h1>Ny anläggning</h1>
+</div>
+
+<main>
+
+  <div class="card">
+    <p class="section-label">Anläggning</p>
+
+    <div class="form-group">
+      <label>Adress <span class="required-dot">●</span></label>
+        <input type="text" id="input-adress" placeholder="t.ex. Lutsjövägen 158" oninput="validera()" />
+        <p class="error-text" id="error-adress">Adress måste fyllas i.</p>
+    </div>
+
+    <div class="form-group">
+        <label>Kundnamn</label>
+        <input type="text" id="input-kundnamn" placeholder="t.ex. Andersson, Eva" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Lägenhetsnummer</label>
+          <input type="text" id="input-lgh" placeholder="—" />
+        </div>
+        <div class="form-group">
+          <label>Centralbeteckning</label>
+          <input type="text" id="input-central" placeholder="t.ex. B3" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Jordslutningsimpedans</label>
+          <div class="unit-wrap">
+            <input type="number" inputmode="decimal" id="input-impedans" placeholder="—" />
+            <span class="unit-label">mΩ</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Kortslutningsström</label>
+          <div class="unit-wrap">
+            <input type="number" inputmode="decimal" id="input-kortslutning" placeholder="—" />
+            <span class="unit-label">kA</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="section-label">Utförd av</p>
+    <div class="prefill-note" id="prefill-note">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg>
+        Förifyllt från ditt konto — ändra vid behov
+    </div>
+
+    <div class="form-group">
+      <label>Företag</label>
+      <input type="text" id="input-foretag" placeholder="—" />
+      </div>
+      <div class="form-group">
+        <label>Telefon</label>
+        <input type="text" id="input-telefon" placeholder="—" />
+      </div>
+      <div class="form-group">
+        <label>Kontaktnamn</label>
+        <input type="text" id="input-kontaktnamn" placeholder="—" />
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="section-label">Testansvar för JFB</p>
+    <p class="section-note">Vem som ska få registrera ett jordfelsbrytartest via QR-koden.</p>
+
+      <div class="toggle-group">
+        <button type="button" class="toggle-btn active" id="btn-kund" onclick="valjTestansvar('kund')">
+          <span class="toggle-title">Kund</span>
+          <span class="toggle-desc">Alla med länken kan testa</span>
+        </button>
+        <button type="button" class="toggle-btn" id="btn-elektriker" onclick="valjTestansvar('elektriker')">
+          <span class="toggle-title">Elektriker</span>
+          <span class="toggle-desc">Endast du kan testa</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="save-bar">
+      <div class="save-bar-inner">
+        <button class="btn-save" onclick="sparaAnlaggning()">Spara anläggning</button>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = "https://mbehqdhpmeovqmoefqgx.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_A6AieNQaEYbtrTe_qNvY2g_4ezyM__o";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let valtTestansvar = "kund";
+
+  function valjTestansvar(val) {
+        valtTestansvar = val;
+    document.getElementById("btn-kund").classList.toggle("active", val === "kund");
+    document.getElementById("btn-elektriker").classList.toggle("active", val === "elektriker");
+  }
+
+  function validera() {
+        const adress = document.getElementById("input-adress");
+    const error = document.getElementById("error-adress");
+    if (adress.value.trim()) {
+      adress.classList.remove("invalid");
+      error.classList.remove("show");
+      return true;
+    }
+    return false;
+  }
+
+  // Hämta kontots sparade uppgifter och förifyll "Utförd av"
+  async function forifyllFranKonto() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      window.location.href = "logga-in.html";
+      return;
+    }
+
+    const { data: profil } = await supabaseClient
+      .from("profiles")
+            .select("foretag, telefon, kontaktnamn")
+            .eq("id", session.user.id)
+            .maybeSingle();
+
+    if (profil) {
+      document.getElementById("input-foretag").value = profil.foretag || "";
+      document.getElementById("input-telefon").value = profil.telefon || "";
+      document.getElementById("input-kontaktnamn").value = profil.kontaktnamn || "";
+    } else {
+      document.getElementById("prefill-note").style.display = "none";
+    }
+  }
+
+  async function sparaAnlaggning() {
+    const adress = document.getElementById("input-adress");
+    const error = document.getElementById("error-adress");
+    if (!adress.value.trim()) {
+      adress.classList.add("invalid");
+      error.classList.add("show");
+      adress.focus();
+      adress.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      window.location.href = "logga-in.html";
+      return;
+    }
+
+    const saveBtn = document.querySelector(".btn-save");
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Sparar...";
+
+    const nyAnlaggning = {
+            user_id: session.user.id,
+                    adress: adress.value.trim(),
+                    kundnamn: document.getElementById("input-kundnamn").value.trim() || null,
+                    lagenhetsnummer: document.getElementById("input-lgh").value.trim() || null,
+                    centralbeteckning: document.getElementById("input-central").value.trim() || null,
+                    jordslutningsimpedans: document.getElementById("input-impedans").value || null,
+                    kortslutningsstrom: document.getElementById("input-kortslutning").value || null,
+                    foretag: document.getElementById("input-foretag").value.trim() || null,
+                    telefon: document.getElementById("input-telefon").value.trim() || null,
+                    kontaktnamn: document.getElementById("input-kontaktnamn").value.trim() || null,
+                    testansvar: valtTestansvar,
+              };
+
+    const { data, error: sparaFel } = await supabaseClient
+      .from("anlaggningar")
+            .insert(nyAnlaggning)
+            .select()
+            .single();
+
+    if (sparaFel) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = "Spara anläggning";
+      alert("Kunde inte spara: " + sparaFel.message);
+      return;
+    }
+
+    window.location.href = "anlaggning-detalj.html?id=" + data.id;
+  }
+
+  forifyllFranKonto();
+</script>
+
+  </body>
+  </html>
+  
