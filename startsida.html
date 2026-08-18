@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Startsida – Prototyp</title>
+<style>
+  :root {
+    --navy: #12233D;
+    --navy-dark: #0B192E;
+    --amber: #F0A202;
+    --bg: #F4F5F3;
+    --text: #181D26;
+    --text-muted: #727A87;
+    --text-faint: #9AA2AF;
+    --border: rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .header {
+    background: var(--navy);
+    color: white;
+    padding: 20px 16px 18px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-top h1 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+  }
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--amber);
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .search-wrap {
+    position: relative;
+    margin-top: 14px;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8FA3C4;
+  }
+  .search-wrap input {
+    width: 100%;
+    background: var(--navy-dark);
+    border: none;
+    border-radius: 12px;
+    padding: 12px 14px 12px 40px;
+    font-size: 15px;
+    color: white;
+    font-family: inherit;
+  }
+  .search-wrap input::placeholder { color: #6B84AC; }
+  .search-wrap input:focus { outline: 2px solid var(--amber); outline-offset: 0; }
+
+  main {
+    padding: 14px 16px 100px;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .list-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin: 4px 4px 8px;
+  }
+
+  .anlaggning-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 13px 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .anlaggning-card:active { transform: scale(0.98); }
+
+  .card-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    background: var(--navy);
+    color: var(--amber);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .card-body { min-width: 0; flex: 1; }
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card-sub {
+    font-size: 12.5px;
+    color: var(--text-faint);
+    margin: 3px 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-chevron { color: #C4C9D1; flex-shrink: 0; }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-faint);
+    font-size: 14px;
+    display: none;
+  }
+
+  .loading-state, .signed-out-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-faint);
+    font-size: 14px;
+  }
+  .signed-out-state a {
+    color: var(--navy);
+    font-weight: 600;
+  }
+
+  .fab {
+    position: fixed;
+    bottom: 22px;
+    right: 20px;
+    background: var(--amber);
+    color: var(--navy);
+    border: none;
+    border-radius: 999px;
+    padding: 15px 20px 15px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 4px 16px rgba(240,162,2,0.4);
+    cursor: pointer;
+    z-index: 25;
+  }
+  .fab:active { transform: scale(0.96); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <h1>Mina anläggningar</h1>
+    <div class="avatar">ME</div>
+  </div>
+  <div class="search-wrap">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    <input type="text" id="search" placeholder="Sök på namn, adress, lgh eller central..." oninput="filtrera()" />
+  </div>
+</div>
+
+<main>
+  <p class="list-label">Senast använda</p>
+  <div id="lista"></div>
+  <p class="empty-state" id="empty">Inga anläggningar matchar din sökning.</p>
+  <div class="loading-state" id="loading">Laddar anläggningar...</div>
+</main>
+
+<button class="fab" onclick="window.location.href='ny-anlaggning.html'">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+  Ny anläggning
+</button>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = "https://mbehqdhpmeovqmoefqgx.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_A6AieNQaEYbtrTe_qNvY2g_4ezyM__o";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let anlaggningar = [];
+
+  function initialer(namn, adress) {
+    const bas = namn || adress;
+    const delar = bas.split(/[\s,]+/).filter(Boolean);
+    if (delar.length >= 2) return (delar[0][0] + delar[1][0]).toUpperCase();
+    return bas.slice(0, 2).toUpperCase();
+  }
+
+  function renderLista(data) {
+    const lista = document.getElementById("lista");
+    const empty = document.getElementById("empty");
+
+    if (data.length === 0) {
+      lista.innerHTML = "";
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    lista.innerHTML = data.map(a => {
+      const titel = a.kundnamn ? `${a.kundnamn}` : a.adress;
+      const subDelar = [];
+      if (a.kundnamn) subDelar.push(a.adress);
+      if (a.lagenhetsnummer) subDelar.push(`Lgh ${a.lagenhetsnummer}`);
+      if (a.centralbeteckning) subDelar.push(`Central ${a.centralbeteckning}`);
+      const sub = subDelar.join(" · ");
+
+      return `
+        <div class="anlaggning-card" onclick="window.location.href='anlaggning-detalj.html?id=${a.id}'">
+          <div class="card-icon">${initialer(a.kundnamn, a.adress)}</div>
+          <div class="card-body">
+            <p class="card-title">${titel}</p>
+            <p class="card-sub">${sub || "&nbsp;"}</p>
+          </div>
+          <svg class="card-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function filtrera() {
+    const q = document.getElementById("search").value.toLowerCase().trim();
+    if (!q) { renderLista(anlaggningar); return; }
+    const filtrerat = anlaggningar.filter(a =>
+      (a.kundnamn && a.kundnamn.toLowerCase().includes(q)) ||
+      a.adress.toLowerCase().includes(q) ||
+      (a.lagenhetsnummer && a.lagenhetsnummer.toLowerCase().includes(q)) ||
+      (a.centralbeteckning && a.centralbeteckning.toLowerCase().includes(q))
+    );
+    renderLista(filtrerat);
+  }
+
+  async function laddaAnlaggningar() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      document.getElementById("loading").innerHTML =
+        'Du är inte inloggad. <a href="logga-in.html">Logga in här</a>';
+      return;
+    }
+
+    const { data, error } = await supabaseClient
+      .from("anlaggningar")
+      .select("id, kundnamn, adress, lagenhetsnummer, centralbeteckning, created_at")
+      .order("created_at", { ascending: false });
+
+    document.getElementById("loading").style.display = "none";
+
+    if (error) {
+      document.getElementById("loading").style.display = "block";
+      document.getElementById("loading").textContent = "Kunde inte hämta anläggningar: " + error.message;
+      return;
+    }
+
+    anlaggningar = data || [];
+    renderLista(anlaggningar);
+  }
+
+  laddaAnlaggningar();
+</script>
+
+</body>
+</html>
