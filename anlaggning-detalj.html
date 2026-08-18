@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Anläggning – Prototyp</title>
+<style>
+  :root {
+    --navy: #12233D;
+    --navy-dark: #0B192E;
+    --amber: #F0A202;
+    --bg: #F4F5F3;
+    --text: #181D26;
+    --text-muted: #727A87;
+    --text-faint: #9AA2AF;
+    --text-placeholder: #C4C9D1;
+    --border: rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .header {
+    background: var(--navy);
+    color: white;
+    padding: 20px 16px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .back-btn {
+    background: none;
+    border: none;
+    color: white;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+  }
+  .title-block h1 {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.2;
+  }
+  .title-block p {
+    font-size: 12px;
+    color: #8FA3C4;
+    margin: 3px 0 0;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-weight: 500;
+  }
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-top: 16px;
+    background: var(--navy-dark);
+    border-radius: 12px;
+    padding: 4px;
+  }
+  .tab-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 4px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    background: none;
+    color: #8FA3C4;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tab-btn.active {
+    background: var(--amber);
+    color: var(--navy);
+  }
+  main {
+    padding: 16px;
+    padding-bottom: 40px;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin: 0 0 8px;
+  }
+  .field-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+  }
+  .field-row:last-child { border-bottom: none; }
+  .field-label { font-size: 13px; color: var(--text-muted); }
+  .field-value { font-size: 14px; font-weight: 500; text-align: right; margin-left: 16px; }
+  .field-value.empty { color: var(--text-placeholder); font-style: italic; }
+  .info-text { font-size: 14px; color: #40495B; line-height: 1.5; margin: 0; }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .count-label { font-size: 13px; color: var(--text-muted); margin: 0; }
+  .btn-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--navy);
+    color: white;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-pill:active { transform: scale(0.96); }
+
+  .group-list {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .group-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+  }
+  .group-row:last-child { border-bottom: none; }
+  .group-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: var(--navy);
+    color: var(--amber);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .group-info p { margin: 0; }
+  .group-title { font-size: 14px; font-weight: 500; }
+  .group-sub { font-size: 12px; color: var(--text-faint); margin-top: 2px !important; }
+
+  .btn-outline {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: white;
+    border: 1px solid rgba(0,0,0,0.1);
+    color: var(--navy);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 13px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .btn-outline:active { transform: scale(0.98); }
+  .btn-solid {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--navy);
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 13px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  .btn-solid:active { transform: scale(0.98); }
+
+  .jfb-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .jfb-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+  }
+  .jfb-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+  }
+  .jfb-row:last-child { border-bottom: none; }
+  .jfb-date { font-size: 14px; font-weight: 500; margin: 0; }
+  .jfb-comment { font-size: 12px; color: var(--text-faint); margin: 2px 0 0; }
+  .jfb-sign {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--navy);
+    background: var(--bg);
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .hint-text { font-size: 12px; color: var(--text-faint); padding: 0 4px; margin: 0 0 12px; }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    align-items: flex-end;
+    z-index: 30;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-sheet {
+    background: white;
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    border-radius: 24px 24px 0 0;
+    padding: 16px 20px 24px;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .modal-header h2 { font-size: 16px; font-weight: 600; margin: 0; }
+  .modal-close {
+    background: var(--bg);
+    border: none;
+    border-radius: 999px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--text-muted);
+  }
+  .form-group { margin-bottom: 12px; }
+  .form-group label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .form-group input {
+    width: 100%;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 12px;
+    padding: 11px 14px;
+    font-size: 15px;
+    font-family: inherit;
+  }
+  .form-group input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--amber);
+    border-color: var(--amber);
+  }
+  .form-row { display: flex; gap: 12px; }
+  .form-row .form-group { flex: 1; }
+  .modal-save {
+    width: 100%;
+    background: var(--amber);
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    margin-top: 8px;
+    cursor: pointer;
+  }
+  .modal-save:disabled { background: rgba(240,162,2,0.4); }
+  .modal-save:not(:disabled):active { transform: scale(0.98); }
+  .modal-cancel {
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 12px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <button class="back-btn" onclick="window.location.href='startsida.html'" aria-label="Tillbaka">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <div class="title-block">
+      <h1 id="titel">Laddar...</h1>
+      <p id="undertitel"></p>
+    </div>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="info" onclick="visaFlik('info', this)">Information</button>
+    <button class="tab-btn" data-tab="grupper" onclick="visaFlik('grupper', this)">Grupper</button>
+    <button class="tab-btn" data-tab="jfb" onclick="visaFlik('jfb', this)">JFB-test</button>
+  </nav>
+</div>
+
+<main>
+
+  <div id="panel-info" class="panel active">
+    <div class="card">
+      <p class="section-label">Anläggning</p>
+      <div class="field-row"><span class="field-label">Kundnamn</span><span class="field-value" id="f-kundnamn">—</span></div>
+      <div class="field-row"><span class="field-label">Adress</span><span class="field-value" id="f-adress">—</span></div>
+      <div class="field-row"><span class="field-label">Lägenhetsnummer</span><span class="field-value" id="f-lgh">—</span></div>
+      <div class="field-row"><span class="field-label">Centralbeteckning</span><span class="field-value" id="f-central">—</span></div>
+      <div class="field-row"><span class="field-label">Jordslutningsimpedans</span><span class="field-value" id="f-impedans">—</span></div>
+      <div class="field-row"><span class="field-label">Kortslutningsström</span><span class="field-value" id="f-kortslutning">—</span></div>
+    </div>
+
+    <div class="card">
+      <p class="section-label">Utförd av</p>
+      <div class="field-row"><span class="field-label">Företag</span><span class="field-value" id="f-foretag">—</span></div>
+      <div class="field-row"><span class="field-label">Telefon</span><span class="field-value" id="f-telefon">—</span></div>
+      <div class="field-row"><span class="field-label">Kontaktnamn</span><span class="field-value" id="f-kontaktnamn">—</span></div>
+    </div>
+
+    <div class="card">
+      <p class="section-label">Testansvar för JFB</p>
+      <p class="info-text" id="f-testansvar">—</p>
+    </div>
+  </div>
+
+  <div id="panel-grupper" class="panel">
+    <div class="toolbar">
+      <p class="count-label" id="grupp-count">0 grupper</p>
+      <button class="btn-pill" onclick="oppnaModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Ny grupp
+      </button>
+    </div>
+
+    <div class="group-list" id="group-list"></div>
+
+    <button class="btn-outline">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      Skriv ut gruppschema (PDF)
+    </button>
+  </div>
+
+  <div id="panel-jfb" class="panel">
+    <div class="jfb-card">
+      <div class="jfb-header">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="#F0A202" stroke="#F0A202"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        <p class="section-label" style="margin:0;" id="jfb-count">Testhistorik (0)</p>
+      </div>
+      <div id="jfb-list"></div>
+    </div>
+
+    <p class="hint-text" id="jfb-hint"></p>
+
+    <button class="btn-solid" onclick="oppnaJfbModal()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      Lägg till testrad
+    </button>
+
+    <button class="btn-outline">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      Skriv ut JFB-protokoll (PDF)
+    </button>
+  </div>
+
+</main>
+
+<div class="modal-overlay" id="modal-overlay" onclick="stangModalUtanfor(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Lägg till grupp</h2>
+      <button class="modal-close" onclick="stangModal()">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Gruppnummer</label>
+      <input type="number" id="input-nummer" />
+    </div>
+    <div class="form-group">
+      <label>Omfattning</label>
+      <input type="text" id="input-omfattning" placeholder="t.ex. Belysning kök" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Märkström (A)</label>
+        <input type="number" inputmode="decimal" id="input-markstrom" placeholder="—" />
+      </div>
+      <div class="form-group">
+        <label>Area (mm²)</label>
+        <input type="number" inputmode="decimal" id="input-area" placeholder="—" />
+      </div>
+    </div>
+    <button class="modal-save" id="save-btn" onclick="sparaGrupp()" disabled>Spara och lägg till nästa grupp</button>
+    <button class="modal-cancel" onclick="stangModal()">Klar</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="jfb-modal-overlay" onclick="stangJfbModalUtanfor(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Lägg till testrad</h2>
+      <button class="modal-close" onclick="stangJfbModal()">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Datum</label>
+      <input type="date" id="jfb-input-datum" />
+    </div>
+    <div class="form-group">
+      <label>Sign</label>
+      <input type="text" id="jfb-input-sign" placeholder="Dina initialer" />
+    </div>
+    <div class="form-group">
+      <label>Kommentar</label>
+      <input type="text" id="jfb-input-kommentar" placeholder="t.ex. OK, löste ut direkt" />
+    </div>
+    <button class="modal-save" id="jfb-save-btn" onclick="sparaJfbTest()">Spara test</button>
+    <button class="modal-cancel" onclick="stangJfbModal()">Avbryt</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = "https://mbehqdhpmeovqmoefqgx.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_A6AieNQaEYbtrTe_qNvY2g_4ezyM__o";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const params = new URLSearchParams(window.location.search);
+  const anlaggningId = params.get("id");
+
+  let grupper = [];
+  let jfbTester = [];
+
+  function visaFlik(namn, btn) {
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.getElementById("panel-" + namn).classList.add("active");
+    btn.classList.add("active");
+  }
+
+  function renderGrupper() {
+    const list = document.getElementById("group-list");
+    list.innerHTML = grupper.map(g => `
+      <div class="group-row">
+        <div class="group-badge">${g.nummer}</div>
+        <div class="group-info">
+          <p class="group-title">${g.omfattning}</p>
+          <p class="group-sub">${g.markstrom || "—"} A &nbsp;·&nbsp; ${g.area || "—"} mm²</p>
+        </div>
+      </div>
+    `).join("");
+    document.getElementById("grupp-count").textContent = grupper.length + " grupper";
+  }
+
+  function renderJfb() {
+    const list = document.getElementById("jfb-list");
+    list.innerHTML = jfbTester.map(t => `
+      <div class="jfb-row">
+        <div>
+          <p class="jfb-date">${t.datum}</p>
+          <p class="jfb-comment">${t.kommentar || "&nbsp;"}</p>
+        </div>
+        <span class="jfb-sign">${t.sign}</span>
+      </div>
+    `).join("");
+    document.getElementById("jfb-count").textContent = "Testhistorik (" + jfbTester.length + ")";
+  }
+
+  function oppnaModal() {
+    const nasta = grupper.length ? Math.max(...grupper.map(g => g.nummer)) + 1 : 1;
+    document.getElementById("input-nummer").value = nasta;
+    document.getElementById("input-omfattning").value = "";
+    document.getElementById("input-markstrom").value = "";
+    document.getElementById("input-area").value = "";
+    document.getElementById("save-btn").disabled = true;
+    document.getElementById("modal-overlay").classList.add("active");
+    setTimeout(() => document.getElementById("input-omfattning").focus(), 100);
+  }
+  function stangModal() {
+    document.getElementById("modal-overlay").classList.remove("active");
+  }
+  function stangModalUtanfor(e) {
+    if (e.target.id === "modal-overlay") stangModal();
+  }
+
+  document.addEventListener("input", (e) => {
+    if (e.target.id === "input-omfattning") {
+      document.getElementById("save-btn").disabled = !e.target.value.trim();
+    }
+  });
+
+  async function sparaGrupp() {
+    const nummer = Number(document.getElementById("input-nummer").value);
+    const omfattning = document.getElementById("input-omfattning").value.trim();
+    const markstrom = document.getElementById("input-markstrom").value || null;
+    const area = document.getElementById("input-area").value || null;
+    if (!omfattning) return;
+
+    const { data, error } = await supabaseClient
+      .from("grupper")
+      .insert({ anlaggning_id: anlaggningId, nummer, omfattning, markstrom, area })
+      .select()
+      .single();
+
+    if (error) {
+      alert("Kunde inte spara grupp: " + error.message);
+      return;
+    }
+
+    grupper.push(data);
+    renderGrupper();
+
+    document.getElementById("input-nummer").value = nummer + 1;
+    document.getElementById("input-omfattning").value = "";
+    document.getElementById("input-markstrom").value = "";
+    document.getElementById("input-area").value = "";
+    document.getElementById("save-btn").disabled = true;
+    document.getElementById("input-omfattning").focus();
+  }
+
+  function oppnaJfbModal() {
+    document.getElementById("jfb-input-datum").value = new Date().toISOString().split("T")[0];
+    document.getElementById("jfb-input-sign").value = "";
+    document.getElementById("jfb-input-kommentar").value = "";
+    document.getElementById("jfb-modal-overlay").classList.add("active");
+  }
+  function stangJfbModal() {
+    document.getElementById("jfb-modal-overlay").classList.remove("active");
+  }
+  function stangJfbModalUtanfor(e) {
+    if (e.target.id === "jfb-modal-overlay") stangJfbModal();
+  }
+
+  async function sparaJfbTest() {
+    const datum = document.getElementById("jfb-input-datum").value;
+    const sign = document.getElementById("jfb-input-sign").value.trim();
+    const kommentar = document.getElementById("jfb-input-kommentar").value.trim();
+    if (!datum || !sign) {
+      alert("Fyll i datum och sign.");
+      return;
+    }
+
+    const { data, error } = await supabaseClient
+      .from("jfb_test")
+      .insert({ anlaggning_id: anlaggningId, datum, sign, kommentar })
+      .select()
+      .single();
+
+    if (error) {
+      alert("Kunde inte spara test: " + error.message);
+      return;
+    }
+
+    jfbTester.unshift(data);
+    renderJfb();
+    stangJfbModal();
+  }
+
+  async function laddaAnlaggning() {
+    if (!anlaggningId) {
+      document.getElementById("titel").textContent = "Ingen anläggning vald";
+      return;
+    }
+
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      window.location.href = "logga-in.html";
+      return;
+    }
+
+    const { data: a, error } = await supabaseClient
+      .from("anlaggningar")
+      .select("*")
+      .eq("id", anlaggningId)
+      .single();
+
+    if (error || !a) {
+      document.getElementById("titel").textContent = "Anläggning hittades inte";
+      return;
+    }
+
+    document.getElementById("titel").textContent = a.kundnamn ? `${a.kundnamn} · ${a.adress}` : a.adress;
+    const undertitelDelar = [];
+    if (a.lagenhetsnummer) undertitelDelar.push(`Lgh ${a.lagenhetsnummer}`);
+    if (a.centralbeteckning) undertitelDelar.push(`Central ${a.centralbeteckning}`);
+    document.getElementById("undertitel").textContent = undertitelDelar.join("  ·  ");
+
+    document.getElementById("f-kundnamn").textContent = a.kundnamn || "Ej ifyllt";
+    document.getElementById("f-adress").textContent = a.adress || "Ej ifyllt";
+    document.getElementById("f-lgh").textContent = a.lagenhetsnummer || "Ej ifyllt";
+    document.getElementById("f-central").textContent = a.centralbeteckning || "Ej ifyllt";
+    document.getElementById("f-impedans").textContent = a.jordslutningsimpedans ? a.jordslutningsimpedans + " mΩ" : "Ej ifyllt";
+    document.getElementById("f-kortslutning").textContent = a.kortslutningsstrom ? a.kortslutningsstrom + " kA" : "Ej ifyllt";
+    document.getElementById("f-foretag").textContent = a.foretag || "Ej ifyllt";
+    document.getElementById("f-telefon").textContent = a.telefon || "Ej ifyllt";
+    document.getElementById("f-kontaktnamn").textContent = a.kontaktnamn || "Ej ifyllt";
+    document.getElementById("f-testansvar").textContent = a.testansvar === "kund"
+      ? "Vem som helst med QR-länken kan registrera ett test."
+      : "Endast inloggad elektriker kan registrera ett test.";
+    document.getElementById("jfb-hint").textContent = a.testansvar === "kund"
+      ? "Alla med QR-länken kan registrera ett nytt test."
+      : "Endast du som elektriker kan registrera ett nytt test.";
+
+    const { data: gruppData } = await supabaseClient
+      .from("grupper")
+      .select("*")
+      .eq("anlaggning_id", anlaggningId)
+      .order("nummer", { ascending: true });
+    grupper = gruppData || [];
+    renderGrupper();
+
+    const { data: jfbData } = await supabaseClient
+      .from("jfb_test")
+      .select("*")
+      .eq("anlaggning_id", anlaggningId)
+      .order("datum", { ascending: false });
+    jfbTester = jfbData || [];
+    renderJfb();
+  }
+
+  laddaAnlaggning();
+</script>
+
+</body>
+</html>
