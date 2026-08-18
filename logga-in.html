@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+  <html lang="sv">
+  <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Bright App - Logga in</title>
+<style>
+  :root {
+        --navy: #12233D;
+    --navy-dark: #0B192E;
+    --amber: #F0A202;
+          --bg: #F4F5F3;
+          --text: #181D26;
+    --text-muted: #727A87;
+    --text-faint: #9AA2AF;
+    --border: rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; }
+  body {
+        margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--navy);
+    color: var(--text);
+    min-height: 100vh;
+}
+  .wrap {
+        max-width: 440px;
+    margin: 0 auto;
+    padding: 48px 24px 32px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+  .logo-mark {
+        width: 72px;
+    height: 72px;
+    border-radius: 16px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    padding: 8px;
+}
+  .headline {
+        color: white;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 6px;
+}
+  .subhead {
+        color: #8FA3C4;
+    font-size: 14px;
+    margin: 0 0 32px;
+    line-height: 1.5;
+  }
+  .panel {
+        background: white;
+    border-radius: 20px;
+    padding: 22px 20px 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+}
+  .mode-switch {
+        display: flex;
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 20px;
+  }
+  .mode-btn {
+        flex: 1;
+    padding: 9px 4px;
+    border-radius: 8px;
+    border: none;
+    background: none;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+  .mode-btn.active {
+    background: var(--navy);
+    color: white;
+    }
+  .form-group { margin-bottom: 14px; }
+  .form-group label {
+        font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 6px;
+}
+  .form-group input {
+        width: 100%;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--text);
+}
+  .form-group input::placeholder { color: #C4C9D1; }
+      .form-group input:focus {
+        outline: none;
+    box-shadow: 0 0 0 2px var(--amber);
+    border-color: var(--amber);
+}
+  #registrera-falt {
+    display: none;
+    overflow: hidden;
+}
+  #registrera-falt.show { display: block; }
+  .btn-primary {
+        width: 100%;
+    background: var(--amber);
+    color: var(--navy);
+    font-weight: 700;
+    font-size: 15px;
+    padding: 13px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    margin-top: 6px;
+}
+  .btn-primary:active { transform: scale(0.98); }
+  .error-msg {
+        font-size: 12.5px;
+    color: #C0362C;
+        margin: -4px 0 12px;
+    min-height: 15px;
+}
+      .switch-text {
+            text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 18px;
+}
+  .switch-text a {
+        color: var(--navy);
+    font-weight: 600;
+    text-decoration: none;
+}
+  .footer-note {
+        text-align: center;
+        color: #6B84AC;
+    font-size: 12px;
+          margin-top: 24px;
+        line-height: 1.5;
+}
+</style>
+  </head>
+  <body>
+
+  <div class="wrap">
+  <div class="logo-mark">
+    <svg width="100%" height="100%" viewBox="0 0 24 24" fill="#12233D"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+    </div>
+    <h1 class="headline">Bright App</h1>
+  <p class="subhead">Gruppscheman och JFB-protokoll, digitalt och redo pa sekunder ute hos kund.</p>
+
+  <div class="panel">
+      <div class="mode-switch">
+        <button class="mode-btn active" id="btn-login" onclick="visaLage('login')">Logga in</button>
+      <button class="mode-btn" id="btn-register" onclick="visaLage('register')">Skapa konto</button>
+      </div>
+
+      <form onsubmit="return false;">
+        <div class="form-group">
+        <label>E-post</label>
+        <input type="email" id="input-epost" placeholder="namn@foretag.se" autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label>Losenord</label>
+          <input type="password" id="input-losenord" placeholder="password" autocomplete="current-password" />
+        </div>
+
+        <div id="registrera-falt">
+          <div class="form-group">
+            <label>Foretagsnamn</label>
+            <input type="text" id="input-foretag" placeholder="t.ex. Bright Elteknik AB" />
+          </div>
+          <div class="form-group">
+            <label>Telefon</label>
+            <input type="tel" id="input-telefon" placeholder="08-520 250 00" />
+          </div>
+        </div>
+
+        <p class="error-msg" id="error-msg"></p>
+        <button class="btn-primary" id="submit-btn" onclick="hanteraSubmit()">Logga in</button>
+      </form>
+
+      <p class="switch-text" id="switch-text">
+        Har du inget konto? <a href="#" onclick="visaLage('register'); return false;">Skapa ett har</a>
+      </p>
+  </div>
+
+  <p class="footer-note">Gratis att anvanda just nu.<br>Inga bindningstider eller kortuppgifter kravs.</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+    const SUPABASE_URL = "https://mbehqdhpmeovqmoefqgx.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_A6AieNQaEYbtrTe_qNvY2g_4ezyM__o";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let currentMode = "login";
+
+  function visaLage(nyttLage) {
+        currentMode = nyttLage;
+    const registrerFalt = document.getElementById("registrera-falt");
+    const submitBtn = document.getElementById("submit-btn");
+    const switchText = document.getElementById("switch-text");
+    document.getElementById("error-msg").textContent = "";
+
+    document.getElementById("btn-login").classList.toggle("active", nyttLage === "login");
+    document.getElementById("btn-register").classList.toggle("active", nyttLage === "register");
+
+    if (nyttLage === "register") {
+      registrerFalt.classList.add("show");
+      submitBtn.textContent = "Skapa konto";
+      switchText.innerHTML = 'Har du redan ett konto? <a href="#" onclick="visaLage(\'login\'); return false;">Logga in har</a>';
+    } else {
+      registrerFalt.classList.remove("show");
+      submitBtn.textContent = "Logga in";
+      switchText.innerHTML = 'Har du inget konto? <a href="#" onclick="visaLage(\'register\'); return false;">Skapa ett har</a>';
+    }
+  }
+
+  function visaFel(text) {
+        document.getElementById("error-msg").textContent = text;
+  }
+
+  async function hanteraSubmit() {
+    const epost = document.getElementById("input-epost").value.trim();
+    const losenord = document.getElementById("input-losenord").value;
+    const submitBtn = document.getElementById("submit-btn");
+
+    if (!epost || !losenord) {
+      visaFel("Fyll i bade e-post och losenord.");
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Ett ogonblick...";
+    visaFel("");
+
+    if (currentMode === "login") {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email: epost,
+                password: losenord,
+        });
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Logga in";
+      if (error) {
+        visaFel("Fel e-post eller losenord. Forsok igen.");
+        return;
+      }
+      window.location.href = "startsida.html";
+    } else {
+      const foretag = document.getElementById("input-foretag").value.trim();
+      const telefon = document.getElementById("input-telefon").value.trim();
+
+      const { data, error } = await supabaseClient.auth.signUp({
+                email: epost,
+                password: losenord,
+        });
+      if (error) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Skapa konto";
+        visaFel(error.message.includes("already") ? "Det finns redan ett konto med den e-posten." : "Nagot gick fel: " + error.message);
+        return;
+      }
+
+      if (data.user) {
+        await supabaseClient.from("profiles").insert({
+                    id: data.user.id,
+                    foretag: foretag || null,
+                    telefon: telefon || null,
+          });
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Skapa konto";
+
+      if (data.session) {
+        window.location.href = "startsida.html";
+      } else {
+        visaFel("Konto skapat! Kolla din e-post for att bekrafta innan du loggar in.");
+      }
+    }
+  }
+</script>
+
+  </body>
+  </html>
+  
