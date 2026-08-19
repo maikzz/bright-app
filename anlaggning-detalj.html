@@ -500,49 +500,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
 
-  function visaGruppschemaPDF() {
-    const idag = new Date().toLocaleDateString('sv-SE');
-    const rader = grupper.map(g => `<tr><td style="text-align:center;font-weight:600;">${g.nummer}</td><td>${g.omfattning || ''}</td><td style="text-align:center;">${g.markstrom || '–'} A</td><td style="text-align:center;">${g.area || '–'} mm²</td></tr>`).join('');
-    const grupperHtml = grupper.length > 0 ? `<table class="pdf-table"><thead><tr><th style="width:60px;">Grupp</th><th>Omfattning</th><th style="width:100px;">Märkström</th><th style="width:100px;">Area</th></tr></thead><tbody>${rader}</tbody></table>` : '<p style="color:#999;font-style:italic;">Inga grupper registrerade än.</p>';
-    const anl = window.__aktuell || {};
-    const titel = anl.kundnamn || anl.adress || 'Anläggning';
-    const undertitel = [anl.adress, anl.lagenhetsnummer ? 'Lgh ' + anl.lagenhetsnummer : '', anl.centralbeteckning ? 'Central ' + anl.centralbeteckning : ''].filter(Boolean).join(' · ');
-    document.getElementById('pdf-gruppschema-content').innerHTML = `
-      <div class="pdf-header">
-        <div><h1>Gruppschema</h1><div class="pdf-sub">${titel}</div><div class="pdf-sub" style="margin-top:2px;">${undertitel}</div></div>
-        <div style="text-align:right;color:#666;font-size:11px;"><div><strong>Utskriven:</strong> ${idag}</div></div>
-      </div>
-      <div class="pdf-section-title">Anläggningsuppgifter</div>
-      <div class="pdf-info-grid">
-        <div class="pdf-info-row"><span class="lbl">Kundnamn:</span><span class="val">${anl.kundnamn || '–'}</span></div>
-        <div class="pdf-info-row"><span class="lbl">Adress:</span><span class="val">${anl.adress || '–'}</span></div>
-        <div class="pdf-info-row"><span class="lbl">Lägenhet:</span><span class="val">${anl.lagenhetsnummer || '–'}</span></div>
-        <div class="pdf-info-row"><span class="lbl">Central:</span><span class="val">${anl.centralbeteckning || '–'}</span></div>
-        <div class="pdf-info-row"><span class="lbl">Jordslutn.impedans:</span><span class="val">${anl.jordslutningsimpedans ? anl.jordslutningsimpedans + ' mΩ' : '–'}</span></div>
-        <div class="pdf-info-row"><span class="lbl">Kortslutn.ström:</span><span class="val">${anl.kortslutningsstrom ? anl.kortslutningsstrom + ' kA' : '–'}</span></div>
-      </div>
-      <div class="pdf-section-title">Gruppförteckning</div>${grupperHtml}
-      <div class="pdf-jfb-guide">
-        <h3>Jordfelsbrytare (JFB) – Guide</h3>
-        <p><strong>Kontroll:</strong> Jordfelsbrytaren ska funktionsprovas <strong>var 6:e månad</strong> genom att trycka på testknappen. Den ska då omedelbart lösa ut.</p>
-        <p><strong>Om jordfelsbrytaren löser ut oplanerat:</strong></p>
-        <p>1. Slå till jordfelsbrytaren igen. Om den inte löser ut igen kan det ha varit en tillfällig störning.</p>
-        <p>2. Om den löser ut direkt: skruva ur alla säkringar i centralen, slå till JFB igen, och skruva in säkringarna en och en tills JFB löser ut – då är felet i den gruppen.</p>
-        <p>3. Om JFB löser ut även med alla säkringar urskruvade: felet är i den fasta installationen. Kontakta fackman.</p>
-        <p>4. Om felet lokaliserats till en grupp: dra ur alla stickproppsanslutna apparater i den gruppen. Slå till JFB. Om den nu står kvar är felet i någon apparat.</p>
-      </div>
-      <div class="pdf-section-title">Utförd av</div>
-      <div class="pdf-info-grid">
-        <div class="pdf-info-row"><span class="lbl">Företag:</span><span class="val">${anl.foretag || '–'}</span></div>
-        <div class="pdf-info-row"><span class="lbl">Telefon:</span><span class="val">${anl.telefon || '–'}</span></div>
-        <div class="pdf-info-row"><span class="lbl">Kontakt:</span><span class="val">${anl.kontaktnamn || '–'}</span></div>
-      </div>
-      <div class="pdf-footer"><div>Skapat med Gruppschemat</div><div>Sida 1 av 1</div></div>
-    `;
-    document.getElementById('pdf-modal-gruppschema').classList.add('active');
-  }
-  function stangPdfModal(id) { document.getElementById(id).classList.remove('active'); }
-
 </script>
 <script>
   const SUPABASE_URL = "https://mbehqdhpmeovqmoefqgx.supabase.co";
@@ -743,6 +700,50 @@
     jfbTester = jfbData || [];
     renderJfb();
   }
+
+  function visaGruppschemaPDF() {
+    const idag = new Date().toLocaleDateString('sv-SE');
+    const rader = grupper.map(g => `<tr><td style="text-align:center;font-weight:600;">${g.nummer}</td><td>${g.omfattning || ''}</td><td style="text-align:center;">${g.markstrom || '–'} A</td><td style="text-align:center;">${g.area || '–'} mm²</td></tr>`).join('');
+    const grupperHtml = grupper.length > 0 ? `<table class="pdf-table"><thead><tr><th style="width:60px;">Grupp</th><th>Omfattning</th><th style="width:100px;">Märkström</th><th style="width:100px;">Area</th></tr></thead><tbody>${rader}</tbody></table>` : '<p style="color:#999;font-style:italic;">Inga grupper registrerade än.</p>';
+    const anl = window.__aktuell || {};
+    const titel = anl.kundnamn || anl.adress || 'Anläggning';
+    const undertitel = [anl.adress, anl.lagenhetsnummer ? 'Lgh ' + anl.lagenhetsnummer : '', anl.centralbeteckning ? 'Central ' + anl.centralbeteckning : ''].filter(Boolean).join(' · ');
+    document.getElementById('pdf-gruppschema-content').innerHTML = `
+      <div class="pdf-header">
+        <div><h1>Gruppschema</h1><div class="pdf-sub">${titel}</div><div class="pdf-sub" style="margin-top:2px;">${undertitel}</div></div>
+        <div style="text-align:right;color:#666;font-size:11px;"><div><strong>Utskriven:</strong> ${idag}</div></div>
+      </div>
+      <div class="pdf-section-title">Anläggningsuppgifter</div>
+      <div class="pdf-info-grid">
+        <div class="pdf-info-row"><span class="lbl">Kundnamn:</span><span class="val">${anl.kundnamn || '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Adress:</span><span class="val">${anl.adress || '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Lägenhet:</span><span class="val">${anl.lagenhetsnummer || '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Central:</span><span class="val">${anl.centralbeteckning || '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Jordslutn.impedans:</span><span class="val">${anl.jordslutningsimpedans ? anl.jordslutningsimpedans + ' mΩ' : '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Kortslutn.ström:</span><span class="val">${anl.kortslutningsstrom ? anl.kortslutningsstrom + ' kA' : '–'}</span></div>
+      </div>
+      <div class="pdf-section-title">Gruppförteckning</div>${grupperHtml}
+      <div class="pdf-jfb-guide">
+        <h3>Jordfelsbrytare (JFB) – Guide</h3>
+        <p><strong>Kontroll:</strong> Jordfelsbrytaren ska funktionsprovas <strong>var 6:e månad</strong> genom att trycka på testknappen. Den ska då omedelbart lösa ut.</p>
+        <p><strong>Om jordfelsbrytaren löser ut oplanerat:</strong></p>
+        <p>1. Slå till jordfelsbrytaren igen. Om den inte löser ut igen kan det ha varit en tillfällig störning.</p>
+        <p>2. Om den löser ut direkt: skruva ur alla säkringar i centralen, slå till JFB igen, och skruva in säkringarna en och en tills JFB löser ut – då är felet i den gruppen.</p>
+        <p>3. Om JFB löser ut även med alla säkringar urskruvade: felet är i den fasta installationen. Kontakta fackman.</p>
+        <p>4. Om felet lokaliserats till en grupp: dra ur alla stickproppsanslutna apparater i den gruppen. Slå till JFB. Om den nu står kvar är felet i någon apparat.</p>
+      </div>
+      <div class="pdf-section-title">Utförd av</div>
+      <div class="pdf-info-grid">
+        <div class="pdf-info-row"><span class="lbl">Företag:</span><span class="val">${anl.foretag || '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Telefon:</span><span class="val">${anl.telefon || '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Kontakt:</span><span class="val">${anl.kontaktnamn || '–'}</span></div>
+      </div>
+      <div class="pdf-footer"><div>Skapat med Gruppschemat</div><div>Sida 1 av 1</div></div>
+    `;
+    document.getElementById('pdf-modal-gruppschema').classList.add('active');
+  }
+  function stangPdfModal(id) { document.getElementById(id).classList.remove('active'); }
+
 
   laddaAnlaggning();
 </script>
