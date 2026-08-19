@@ -331,6 +331,35 @@
     padding: 12px;
     cursor: pointer;
   }
+
+  .pdf-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; z-index: 40; overflow: auto; }
+  .pdf-modal.active { display: block; }
+  .pdf-toolbar { position: sticky; top: 0; background: var(--navy); color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 41; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .pdf-toolbar-title { font-size: 15px; font-weight: 600; }
+  .pdf-toolbar-actions { display: flex; gap: 8px; }
+  .pdf-btn { border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .pdf-btn-primary { background: var(--amber); color: var(--navy); }
+  .pdf-btn-secondary { background: rgba(255,255,255,0.15); color: white; }
+  .pdf-page-wrap { padding: 20px; display: flex; justify-content: center; }
+  .pdf-page { background: white; color: #222; width: 100%; max-width: 800px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.5; }
+  .pdf-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #12233D; padding-bottom: 16px; margin-bottom: 20px; }
+  .pdf-header h1 { font-size: 22px; margin: 0 0 4px; color: #12233D; }
+  .pdf-header .pdf-sub { color: #666; font-size: 13px; }
+  .pdf-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; margin-bottom: 20px; }
+  .pdf-info-row { display: flex; gap: 8px; }
+  .pdf-info-row .lbl { color: #666; min-width: 120px; }
+  .pdf-info-row .val { font-weight: 600; }
+  .pdf-section-title { font-size: 14px; font-weight: 700; color: #12233D; margin: 20px 0 10px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
+  .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  .pdf-table th, .pdf-table td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; font-size: 11px; }
+  .pdf-table th { background: #12233D; color: white; font-weight: 600; }
+  .pdf-jfb-guide { background: #FFF8EA; border: 1px solid #F5DDA0; border-radius: 8px; padding: 12px 14px; margin-top: 16px; font-size: 11px; }
+  .pdf-jfb-guide h3 { margin: 0 0 6px; font-size: 13px; color: #6B5A1F; }
+  .pdf-jfb-guide p { margin: 4px 0; }
+  .pdf-jfb-guide strong { color: #4A3D12; }
+  .pdf-footer { margin-top: 24px; padding-top: 12px; border-top: 1px solid #ddd; color: #666; font-size: 10px; display: flex; justify-content: space-between; }
+  @media print { body * { visibility: hidden; } .pdf-modal, .pdf-modal * { visibility: visible; } .pdf-toolbar { display: none; } .pdf-modal { position: static; background: white; overflow: visible; } .pdf-page-wrap { padding: 0; } .pdf-page { box-shadow: none; padding: 20mm; max-width: none; } @page { margin: 0; size: A4; } }
+
 </style>
 </head>
 <body>
@@ -390,10 +419,7 @@
 
     <div class="group-list" id="group-list"></div>
 
-    <button class="btn-outline">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-      Skriv ut gruppschema (PDF)
-    </button>
+    <button class="btn-outline" onclick="visaGruppschemaPDF()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>Skriv ut gruppschema (PDF)</button>
   </div>
 
   <div id="panel-jfb" class="panel">
@@ -472,7 +498,52 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
+
+  function visaGruppschemaPDF() {
+    const idag = new Date().toLocaleDateString('sv-SE');
+    const rader = grupper.map(g => `<tr><td style="text-align:center;font-weight:600;">${g.nummer}</td><td>${g.omfattning || ''}</td><td style="text-align:center;">${g.markstrom || '–'} A</td><td style="text-align:center;">${g.area || '–'} mm²</td></tr>`).join('');
+    const grupperHtml = grupper.length > 0 ? `<table class="pdf-table"><thead><tr><th style="width:60px;">Grupp</th><th>Omfattning</th><th style="width:100px;">Märkström</th><th style="width:100px;">Area</th></tr></thead><tbody>${rader}</tbody></table>` : '<p style="color:#999;font-style:italic;">Inga grupper registrerade än.</p>';
+    const anl = window.__aktuell || {};
+    const titel = anl.kundnamn || anl.adress || 'Anläggning';
+    const undertitel = [anl.adress, anl.lagenhetsnummer ? 'Lgh ' + anl.lagenhetsnummer : '', anl.centralbeteckning ? 'Central ' + anl.centralbeteckning : ''].filter(Boolean).join(' · ');
+    document.getElementById('pdf-gruppschema-content').innerHTML = `
+      <div class="pdf-header">
+        <div><h1>Gruppschema</h1><div class="pdf-sub">${titel}</div><div class="pdf-sub" style="margin-top:2px;">${undertitel}</div></div>
+        <div style="text-align:right;color:#666;font-size:11px;"><div><strong>Utskriven:</strong> ${idag}</div></div>
+      </div>
+      <div class="pdf-section-title">Anläggningsuppgifter</div>
+      <div class="pdf-info-grid">
+        <div class="pdf-info-row"><span class="lbl">Kundnamn:</span><span class="val">${anl.kundnamn || '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Adress:</span><span class="val">${anl.adress || '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Lägenhet:</span><span class="val">${anl.lagenhetsnummer || '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Central:</span><span class="val">${anl.centralbeteckning || '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Jordslutn.impedans:</span><span class="val">${anl.jordslutningsimpedans ? anl.jordslutningsimpedans + ' mΩ' : '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Kortslutn.ström:</span><span class="val">${anl.kortslutningsstrom ? anl.kortslutningsstrom + ' kA' : '–'}</span></div>
+      </div>
+      <div class="pdf-section-title">Gruppförteckning</div>${grupperHtml}
+      <div class="pdf-jfb-guide">
+        <h3>Jordfelsbrytare (JFB) – Guide</h3>
+        <p><strong>Kontroll:</strong> Jordfelsbrytaren ska funktionsprovas <strong>var 6:e månad</strong> genom att trycka på testknappen. Den ska då omedelbart lösa ut.</p>
+        <p><strong>Om jordfelsbrytaren löser ut oplanerat:</strong></p>
+        <p>1. Slå till jordfelsbrytaren igen. Om den inte löser ut igen kan det ha varit en tillfällig störning.</p>
+        <p>2. Om den löser ut direkt: skruva ur alla säkringar i centralen, slå till JFB igen, och skruva in säkringarna en och en tills JFB löser ut – då är felet i den gruppen.</p>
+        <p>3. Om JFB löser ut även med alla säkringar urskruvade: felet är i den fasta installationen. Kontakta fackman.</p>
+        <p>4. Om felet lokaliserats till en grupp: dra ur alla stickproppsanslutna apparater i den gruppen. Slå till JFB. Om den nu står kvar är felet i någon apparat.</p>
+      </div>
+      <div class="pdf-section-title">Utförd av</div>
+      <div class="pdf-info-grid">
+        <div class="pdf-info-row"><span class="lbl">Företag:</span><span class="val">${anl.foretag || '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Telefon:</span><span class="val">${anl.telefon || '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Kontakt:</span><span class="val">${anl.kontaktnamn || '–'}</span></div>
+      </div>
+      <div class="pdf-footer"><div>Skapat med Gruppschemat</div><div>Sida 1 av 1</div></div>
+    `;
+    document.getElementById('pdf-modal-gruppschema').classList.add('active');
+  }
+  function stangPdfModal(id) { document.getElementById(id).classList.remove('active'); }
+
+</script>
 <script>
   const SUPABASE_URL = "https://mbehqdhpmeovqmoefqgx.supabase.co";
   const SUPABASE_KEY = "sb_publishable_A6AieNQaEYbtrTe_qNvY2g_4ezyM__o";
@@ -621,6 +692,7 @@
       return;
     }
 
+    window.__aktuell = null;
     const { data: a, error } = await supabaseClient
       .from("anlaggningar")
       .select("*")
@@ -632,6 +704,7 @@
       return;
     }
 
+    window.__aktuell = a;
     document.getElementById("titel").textContent = a.kundnamn ? `${a.kundnamn} · ${a.adress}` : a.adress;
     const undertitelDelar = [];
     if (a.lagenhetsnummer) undertitelDelar.push(`Lgh ${a.lagenhetsnummer}`);
@@ -673,6 +746,19 @@
 
   laddaAnlaggning();
 </script>
+
+
+
+<div class="pdf-modal" id="pdf-modal-gruppschema">
+  <div class="pdf-toolbar">
+    <div class="pdf-toolbar-title">Förhandsgranskning – Gruppschema</div>
+    <div class="pdf-toolbar-actions">
+      <button class="pdf-btn pdf-btn-secondary" onclick="stangPdfModal('pdf-modal-gruppschema')">Stäng</button>
+      <button class="pdf-btn pdf-btn-primary" onclick="window.print()">Skriv ut / Spara som PDF</button>
+    </div>
+  </div>
+  <div class="pdf-page-wrap"><div class="pdf-page" id="pdf-gruppschema-content"></div></div>
+</div>
 
 </body>
 </html>
