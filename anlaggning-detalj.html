@@ -679,6 +679,14 @@
     }
 
     window.__aktuell = a;
+    // Hämta elektrikerns firmalogga
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session) {
+        const { data: prof } = await supabaseClient.from("profiles").select("firmalogo").eq("id", session.user.id).single();
+        window.__firmalogo = prof && prof.firmalogo ? prof.firmalogo : null;
+      }
+    } catch (e) { window.__firmalogo = null; }
     document.getElementById("titel").textContent = a.kundnamn ? `${a.kundnamn} · ${a.adress}` : a.adress;
     const undertitelDelar = [];
     if (a.lagenhetsnummer) undertitelDelar.push(`Lgh ${a.lagenhetsnummer}`);
@@ -728,9 +736,12 @@
     document.getElementById('pdf-gruppschema-content').innerHTML = `
       <div class="pdf-header">
         <div><h1>Gruppschema</h1><div class="pdf-sub">${titel}</div><div class="pdf-sub" style="margin-top:2px;">${undertitel}</div><div class="pdf-sub" style="margin-top:4px;font-size:11px;"><strong>Utskriven:</strong> ${idag}</div></div>
-        <div style="text-align:center;">
-          <div id="pdf-qr-gruppschema" style="width:100px;height:100px;"></div>
-          <div style="font-size:9px;color:#666;margin-top:3px;">Skanna för JFB-test</div>
+        <div style="display:flex;align-items:flex-start;gap:16px;">
+          ${window.__firmalogo ? `<div style="text-align:center;"><img src="${window.__firmalogo}" alt="Firmalogga" style="max-width:110px;max-height:70px;object-fit:contain;" /></div>` : ""}
+          <div style="text-align:center;">
+            <div id="pdf-qr-gruppschema" style="width:100px;height:100px;"></div>
+            <div style="font-size:9px;color:#666;margin-top:3px;">Skanna för JFB-test</div>
+          </div>
         </div>
       </div>
       <div class="pdf-section-title">Anläggningsuppgifter</div>
@@ -781,9 +792,12 @@
     document.getElementById('pdf-jfb-content').innerHTML = `
       <div class="pdf-header">
         <div><h1>Protokoll – Funktionsprov av jordfelsbrytare</h1><div class="pdf-sub">${titel}</div><div class="pdf-sub" style="margin-top:2px;">${undertitel}</div><div class="pdf-sub" style="margin-top:4px;font-size:11px;"><strong>Utskriven:</strong> ${idag}</div></div>
-        <div style="text-align:center;">
-          <div id="pdf-qr-jfb" style="width:100px;height:100px;"></div>
-          <div style="font-size:9px;color:#666;margin-top:3px;">Skanna för att registrera test</div>
+        <div style="display:flex;align-items:flex-start;gap:16px;">
+          ${window.__firmalogo ? `<div style="text-align:center;"><img src="${window.__firmalogo}" alt="Firmalogga" style="max-width:110px;max-height:70px;object-fit:contain;" /></div>` : ""}
+          <div style="text-align:center;">
+            <div id="pdf-qr-jfb" style="width:100px;height:100px;"></div>
+            <div style="font-size:9px;color:#666;margin-top:3px;">Skanna för att registrera test</div>
+          </div>
         </div>
       </div>
       <div class="pdf-jfb-guide" style="margin-top:0;margin-bottom:16px;">
