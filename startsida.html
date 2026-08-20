@@ -255,19 +255,6 @@
 </button>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
-  function toggleMeny(e) {
-    e.stopPropagation();
-    document.getElementById('avatar-meny').classList.toggle('open');
-  }
-  document.addEventListener('click', function() {
-    const m = document.getElementById('avatar-meny');
-    if (m) m.classList.remove('open');
-  });
-  async function loggaUt() {
-    await supabaseClient.auth.signOut();
-    window.location.href = 'logga-in.html';
-  }
-
 </script>
 <script>
   const SUPABASE_URL = "https://mbehqdhpmeovqmoefqgx.supabase.co";
@@ -351,6 +338,22 @@
     anlaggningar = data || [];
     renderLista(anlaggningar);
   }
+
+
+  function toggleMeny(e) {
+    e.stopPropagation();
+    document.getElementById('avatar-meny').classList.toggle('open');
+  }
+  document.addEventListener('click', function() {
+    const m = document.getElementById('avatar-meny');
+    if (m) m.classList.remove('open');
+  });
+  async function loggaUt() {
+    await supabaseClient.auth.signOut();
+    window.location.href = 'logga-in.html';
+  }
+
+
 
   laddaAnlaggningar();
 </script>
