@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 <title>Gruppschemat - Anläggning</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
   :root {
     --navy: #12233D;
@@ -358,7 +359,7 @@
   .pdf-jfb-guide p { margin: 4px 0; }
   .pdf-jfb-guide strong { color: #4A3D12; }
   .pdf-footer { margin-top: 24px; padding-top: 12px; border-top: 1px solid #ddd; color: #666; font-size: 10px; display: flex; justify-content: space-between; }
-  @media print { body * { visibility: hidden; } .pdf-modal, .pdf-modal * { visibility: visible; } .pdf-toolbar { display: none; } .pdf-modal { position: static; background: white; overflow: visible; } .pdf-page-wrap { padding: 0; } .pdf-page { box-shadow: none; padding: 20mm; max-width: none; } @page { margin: 0; size: A4; } }
+  @media print { html, body { margin: 0 !important; padding: 0 !important; background: white !important; } body * { visibility: hidden; } .pdf-modal, .pdf-modal * { visibility: visible; } .pdf-toolbar { display: none !important; } .pdf-modal { position: absolute !important; inset: 0 !important; top: 0 !important; left: 0 !important; background: white !important; overflow: visible !important; } .pdf-page-wrap { padding: 0 !important; margin: 0 !important; display: block !important; } .pdf-page { box-shadow: none !important; padding: 12mm !important; margin: 0 !important; max-width: none !important; width: 100% !important; } @page { margin: 0; size: A4; } }
 
 </style>
 </head>
@@ -438,10 +439,7 @@
       Lägg till testrad
     </button>
 
-    <button class="btn-outline">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-      Skriv ut JFB-protokoll (PDF)
-    </button>
+    <button class="btn-outline" onclick="visaJfbProtokollPDF()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>Skriv ut JFB-protokoll (PDF)</button>
   </div>
 
 </main>
@@ -710,8 +708,11 @@
     const undertitel = [anl.adress, anl.lagenhetsnummer ? 'Lgh ' + anl.lagenhetsnummer : '', anl.centralbeteckning ? 'Central ' + anl.centralbeteckning : ''].filter(Boolean).join(' · ');
     document.getElementById('pdf-gruppschema-content').innerHTML = `
       <div class="pdf-header">
-        <div><h1>Gruppschema</h1><div class="pdf-sub">${titel}</div><div class="pdf-sub" style="margin-top:2px;">${undertitel}</div></div>
-        <div style="text-align:right;color:#666;font-size:11px;"><div><strong>Utskriven:</strong> ${idag}</div></div>
+        <div><h1>Gruppschema</h1><div class="pdf-sub">${titel}</div><div class="pdf-sub" style="margin-top:2px;">${undertitel}</div><div class="pdf-sub" style="margin-top:4px;font-size:11px;"><strong>Utskriven:</strong> ${idag}</div></div>
+        <div style="text-align:center;">
+          <div id="pdf-qr-gruppschema" style="width:100px;height:100px;"></div>
+          <div style="font-size:9px;color:#666;margin-top:3px;">Skanna för JFB-test</div>
+        </div>
       </div>
       <div class="pdf-section-title">Anläggningsuppgifter</div>
       <div class="pdf-info-grid">
@@ -741,14 +742,76 @@
       <div class="pdf-footer"><div>Skapat med Gruppschemat</div><div>Sida 1 av 1</div></div>
     `;
     document.getElementById('pdf-modal-gruppschema').classList.add('active');
+    if (anl.publikt_id) {
+      const qrDiv = document.getElementById('pdf-qr-gruppschema');
+      qrDiv.innerHTML = '';
+      new QRCode(qrDiv, { text: window.location.origin + '/publik-test.html?id=' + anl.publikt_id, width: 100, height: 100, colorDark: '#12233D', colorLight: '#ffffff' });
+    }
   }
   function stangPdfModal(id) { document.getElementById(id).classList.remove('active'); }
 
+
+  function visaJfbProtokollPDF() {
+    const idag = new Date().toLocaleDateString('sv-SE');
+    const anl = window.__aktuell || {};
+    const titel = anl.kundnamn || anl.adress || 'Anläggning';
+    const undertitel = [anl.adress, anl.lagenhetsnummer ? 'Lgh ' + anl.lagenhetsnummer : '', anl.centralbeteckning ? 'Central ' + anl.centralbeteckning : ''].filter(Boolean).join(' · ');
+    const tester = (jfbTester || []).slice().reverse();
+    const testRader = tester.map(t => `<tr><td>${t.datum}</td><td style="text-align:center;">${t.sign}</td><td>${t.kommentar || ''}</td></tr>`).join('');
+    const tommaRader = Array(Math.max(0, 20 - tester.length)).fill(0).map(() => '<tr><td style="height:22px;">&nbsp;</td><td></td><td></td></tr>').join('');
+    document.getElementById('pdf-jfb-content').innerHTML = `
+      <div class="pdf-header">
+        <div><h1>Protokoll – Funktionsprov av jordfelsbrytare</h1><div class="pdf-sub">${titel}</div><div class="pdf-sub" style="margin-top:2px;">${undertitel}</div><div class="pdf-sub" style="margin-top:4px;font-size:11px;"><strong>Utskriven:</strong> ${idag}</div></div>
+        <div style="text-align:center;">
+          <div id="pdf-qr-jfb" style="width:100px;height:100px;"></div>
+          <div style="font-size:9px;color:#666;margin-top:3px;">Skanna för att registrera test</div>
+        </div>
+      </div>
+      <div class="pdf-jfb-guide" style="margin-top:0;margin-bottom:16px;">
+        <h3>Jordfelsbrytare (JFB) – Guide</h3>
+        <p><strong>Kontroll:</strong> Jordfelsbrytaren ska funktionsprovas <strong>var 6:e månad</strong> genom att trycka på testknappen. Den ska då omedelbart lösa ut.</p>
+        <p><strong>Om jordfelsbrytaren löser ut oplanerat:</strong></p>
+        <p>1. Slå till jordfelsbrytaren igen. Om den inte löser ut igen kan det ha varit en tillfällig störning.</p>
+        <p>2. Om den löser ut direkt: skruva ur alla säkringar i centralen, slå till JFB igen, och skruva in säkringarna en och en tills JFB löser ut – då är felet i den gruppen.</p>
+        <p>3. Om JFB löser ut även med alla säkringar urskruvade: felet är i den fasta installationen. Kontakta fackman.</p>
+        <p>4. Om felet lokaliserats till en grupp: dra ur alla stickproppsanslutna apparater i den gruppen. Slå till JFB. Om den nu står kvar är felet i någon apparat.</p>
+      </div>
+      <div class="pdf-section-title">Funktionsprov utfört (skall utföras minst två gånger per år)</div>
+      <table class="pdf-table">
+        <thead><tr><th style="width:110px;">Datum</th><th style="width:70px;">Sign</th><th>Kommentar</th></tr></thead>
+        <tbody>${testRader}${tommaRader}</tbody>
+      </table>
+      <div class="pdf-section-title">Utförd av</div>
+      <div class="pdf-info-grid">
+        <div class="pdf-info-row"><span class="lbl">Företag:</span><span class="val">${anl.foretag || '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Telefon:</span><span class="val">${anl.telefon || '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Kontakt:</span><span class="val">${anl.kontaktnamn || '–'}</span></div>
+      </div>
+      <div class="pdf-footer"><div>Skapat med Gruppschemat</div><div>Sida 1 av 1</div></div>
+    `;
+    document.getElementById('pdf-modal-jfb').classList.add('active');
+    if (anl.publikt_id) {
+      const qrDiv = document.getElementById('pdf-qr-jfb');
+      qrDiv.innerHTML = '';
+      new QRCode(qrDiv, { text: window.location.origin + '/publik-test.html?id=' + anl.publikt_id, width: 100, height: 100, colorDark: '#12233D', colorLight: '#ffffff' });
+    }
+  }
 
   laddaAnlaggning();
 </script>
 
 
+
+<div class="pdf-modal" id="pdf-modal-jfb">
+  <div class="pdf-toolbar">
+    <div class="pdf-toolbar-title">Förhandsgranskning – JFB-protokoll</div>
+    <div class="pdf-toolbar-actions">
+      <button class="pdf-btn pdf-btn-secondary" onclick="stangPdfModal('pdf-modal-jfb')">Stäng</button>
+      <button class="pdf-btn pdf-btn-primary" onclick="window.print()">Skriv ut / Spara som PDF</button>
+    </div>
+  </div>
+  <div class="pdf-page-wrap"><div class="pdf-page" id="pdf-jfb-content"></div></div>
+</div>
 
 <div class="pdf-modal" id="pdf-modal-gruppschema">
   <div class="pdf-toolbar">
