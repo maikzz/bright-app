@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Gruppschemat - Inställningar</title>
+<style>
+  :root {
+    --navy: #12233D;
+    --navy-dark: #0B192E;
+    --amber: #F0A202;
+    --bg: #F4F5F3;
+    --text: #181D26;
+    --text-muted: #727A87;
+    --text-faint: #9AA2AF;
+    --border: rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .header {
+    background: var(--navy);
+    color: white;
+    padding: 20px 16px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .back-btn {
+    background: none;
+    border: none;
+    color: white;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+  }
+  .header h1 { font-size: 17px; font-weight: 600; margin: 0; }
+  main { padding: 16px; max-width: 520px; margin: 0 auto; padding-bottom: 40px; }
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 18px 16px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin: 0 0 10px;
+  }
+  .info-text { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0 0 16px; }
+  .logo-preview {
+    width: 100%;
+    height: 140px;
+    border: 2px dashed rgba(0,0,0,0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .logo-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .logo-preview .placeholder { color: var(--text-faint); font-size: 13px; text-align: center; padding: 0 20px; }
+  .btn-primary {
+    width: 100%;
+    background: var(--amber);
+    color: var(--navy);
+    font-weight: 700;
+    font-size: 15px;
+    padding: 13px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-outline {
+    width: 100%;
+    background: white;
+    border: 1px solid rgba(0,0,0,0.12);
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .btn-danger {
+    width: 100%;
+    background: none;
+    border: none;
+    color: #C0362C;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px;
+    cursor: pointer;
+  }
+  input[type="file"] { display: none; }
+  .status-msg { font-size: 13px; margin: 8px 0 0; min-height: 18px; text-align: center; }
+  .status-msg.ok { color: #2E8B57; }
+  .status-msg.fel { color: #C0362C; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <button class="back-btn" onclick="window.location.href='startsida.html'" aria-label="Tillbaka">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+  </button>
+  <h1>Inställningar</h1>
+</div>
+
+<main>
+  <div class="card">
+    <p class="section-label">Din firmalogga</p>
+    <p class="info-text">Ladda upp företagets logotyp så visas den på alla dina PDF-utskrifter (gruppscheman och JFB-protokoll). En bra reklam för ditt företag!</p>
+
+    <div class="logo-preview" id="logo-preview">
+      <span class="placeholder">Ingen logga uppladdad än</span>
+    </div>
+
+    <button class="btn-outline" onclick="document.getElementById('logo-input').click()">Välj bild...</button>
+    <input type="file" id="logo-input" accept="image/png,image/jpeg,image/jpg,image/webp" />
+
+    <button class="btn-primary" id="spara-btn" onclick="sparaLogga()" style="display:none;margin-top:10px;">Spara logga</button>
+    <button class="btn-danger" id="ta-bort-btn" onclick="taBortLogga()" style="display:none;">Ta bort logga</button>
+
+    <p class="status-msg" id="status"></p>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = "https://mbehqdhpmeovqmoefqgx.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_A6AieNQaEYbtrTe_qNvY2g_4ezyM__o";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let valdBildData = null;
+  let anvandarId = null;
+
+  function visaStatus(text, typ) {
+    const el = document.getElementById("status");
+    el.textContent = text;
+    el.className = "status-msg " + (typ || "");
+  }
+
+  function visaLogga(dataUrl) {
+    const preview = document.getElementById("logo-preview");
+    if (dataUrl) {
+      preview.innerHTML = '<img src="' + dataUrl + '" alt="Firmalogga" />';
+      document.getElementById("ta-bort-btn").style.display = "block";
+    } else {
+      preview.innerHTML = '<span class="placeholder">Ingen logga uppladdad än</span>';
+      document.getElementById("ta-bort-btn").style.display = "none";
+    }
+  }
+
+  document.getElementById("logo-input").addEventListener("change", function(e) {
+    const fil = e.target.files[0];
+    if (!fil) return;
+    if (fil.size > 500000) {
+      visaStatus("Bilden är för stor (max 500 kB). Välj en mindre bild.", "fel");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      // Skala ner bilden till max 400px bredd för att spara plats
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement("canvas");
+        const maxW = 400;
+        const skala = Math.min(1, maxW / img.width);
+        canvas.width = img.width * skala;
+        canvas.height = img.height * skala;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        valdBildData = canvas.toDataURL("image/png");
+        visaLogga(valdBildData);
+        document.getElementById("spara-btn").style.display = "block";
+        visaStatus("Klicka 'Spara logga' för att spara.", "");
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(fil);
+  });
+
+  async function sparaLogga() {
+    if (!valdBildData || !anvandarId) return;
+    document.getElementById("spara-btn").disabled = true;
+    visaStatus("Sparar...", "");
+    const { error } = await supabaseClient
+      .from("profiles")
+      .update({ firmalogo: valdBildData })
+      .eq("id", anvandarId);
+    document.getElementById("spara-btn").disabled = false;
+    if (error) {
+      visaStatus("Kunde inte spara: " + error.message, "fel");
+      return;
+    }
+    visaStatus("Loggan är sparad!", "ok");
+    document.getElementById("spara-btn").style.display = "none";
+  }
+
+  async function taBortLogga() {
+    if (!anvandarId) return;
+    if (!confirm("Vill du ta bort din firmalogga?")) return;
+    const { error } = await supabaseClient
+      .from("profiles")
+      .update({ firmalogo: null })
+      .eq("id", anvandarId);
+    if (error) {
+      visaStatus("Kunde inte ta bort: " + error.message, "fel");
+      return;
+    }
+    valdBildData = null;
+    visaLogga(null);
+    document.getElementById("spara-btn").style.display = "none";
+    visaStatus("Loggan är borttagen.", "ok");
+  }
+
+  async function laddaSida() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      window.location.href = "logga-in.html";
+      return;
+    }
+    anvandarId = session.user.id;
+    const { data } = await supabaseClient
+      .from("profiles")
+      .select("firmalogo")
+      .eq("id", anvandarId)
+      .single();
+    if (data && data.firmalogo) {
+      visaLogga(data.firmalogo);
+    }
+  }
+
+  laddaSida();
+</script>
+
+</body>
+</html>
