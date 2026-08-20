@@ -381,6 +381,19 @@
     @page { margin-top: 12mm; margin-bottom: 12mm; }
   }
 
+
+  .modal-delete {
+    width: 100%;
+    background: none;
+    border: none;
+    color: #C0362C;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 12px;
+    margin-top: 8px;
+    cursor: pointer;
+  }
+
 </style>
 </head>
 <body>
@@ -467,7 +480,7 @@
 <div class="modal-overlay" id="modal-overlay" onclick="stangModalUtanfor(event)">
   <div class="modal-sheet" onclick="event.stopPropagation()">
     <div class="modal-header">
-      <h2>Lägg till grupp</h2>
+      <h2 id="modal-titel">Lägg till grupp</h2>
       <button class="modal-close" onclick="stangModal()">✕</button>
     </div>
     <div class="form-group">
@@ -489,6 +502,7 @@
       </div>
     </div>
     <button class="modal-save" id="save-btn" onclick="sparaGrupp()" disabled>Spara och lägg till nästa grupp</button>
+        <button class="modal-delete" id="ta-bort-grupp-btn" onclick="taBortGrupp()" style="display:none;">Ta bort grupp</button>
     <button class="modal-cancel" onclick="stangModal()">Klar</button>
   </div>
 </div>
@@ -540,7 +554,7 @@
   function renderGrupper() {
     const list = document.getElementById("group-list");
     list.innerHTML = grupper.map(g => `
-      <div class="group-row">
+      <div class="group-row" onclick="redigeraGrupp('${g.id}')" style="cursor:pointer;">
         <div class="group-badge">${g.nummer}</div>
         <div class="group-info">
           <p class="group-title">${g.omfattning}</p>
@@ -566,6 +580,10 @@
   }
 
   function oppnaModal() {
+    window.__redigerarId = null;
+    var _tb = document.getElementById("ta-bort-grupp-btn"); if (_tb) _tb.style.display = "none";
+    var _mt = document.getElementById("modal-titel"); if (_mt) _mt.textContent = "Ny grupp";
+    var _sb = document.getElementById("save-btn"); if (_sb) _sb.textContent = "Spara och lägg till nästa grupp";
     const nasta = grupper.length ? Math.max(...grupper.map(g => g.nummer)) + 1 : 1;
     document.getElementById("input-nummer").value = nasta;
     document.getElementById("input-omfattning").value = "";
@@ -588,6 +606,34 @@
     }
   });
 
+
+  function redigeraGrupp(id) {
+    const g = grupper.find(x => String(x.id) === String(id));
+    if (!g) return;
+    window.__redigerarId = id;
+    document.getElementById("input-nummer").value = g.nummer || "";
+    document.getElementById("input-omfattning").value = g.omfattning || "";
+    document.getElementById("input-markstrom").value = g.markstrom || "";
+    document.getElementById("input-area").value = g.area || "";
+    const mt = document.getElementById("modal-titel");
+    if (mt) mt.textContent = "Redigera grupp";
+    const tb = document.getElementById("ta-bort-grupp-btn");
+    if (tb) tb.style.display = "block";
+    const sb = document.getElementById("save-btn");
+    if (sb) { sb.textContent = "Spara ändringar"; sb.disabled = false; }
+    document.getElementById("modal-overlay").classList.add("open");
+  }
+
+  async function taBortGrupp() {
+    if (!window.__redigerarId) return;
+    if (!confirm("Vill du ta bort denna grupp?")) return;
+    const { error } = await supabaseClient.from("grupper").delete().eq("id", window.__redigerarId);
+    if (error) { alert("Kunde inte ta bort: " + error.message); return; }
+    window.__redigerarId = null;
+    stangModal();
+    laddaAnlaggning();
+  }
+
   async function sparaGrupp() {
     const nummer = Number(document.getElementById("input-nummer").value);
     const omfattning = document.getElementById("input-omfattning").value.trim();
@@ -595,9 +641,11 @@
     const area = document.getElementById("input-area").value || null;
     if (!omfattning) return;
 
-    const { data, error } = await supabaseClient
-      .from("grupper")
-      .insert({ anlaggning_id: anlaggningId, nummer, omfattning, markstrom, area })
+    const { data, error } = window.__redigerarId
+      ? await supabaseClient.from("grupper").update({ anlaggning_id: anlaggningId, nummer, omfattning, markstrom, area })
+      .select()
+      .single().eq("id", window.__redigerarId)
+      : await supabaseClient.from("grupper").insert({ anlaggning_id: anlaggningId, nummer, omfattning, markstrom, area })
       .select()
       .single();
 
