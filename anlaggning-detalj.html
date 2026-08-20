@@ -342,21 +342,21 @@
   .pdf-btn-primary { background: var(--amber); color: var(--navy); }
   .pdf-btn-secondary { background: rgba(255,255,255,0.15); color: white; }
   .pdf-page-wrap { padding: 20px; display: flex; justify-content: center; }
-  .pdf-page { background: white; color: #222; width: 100%; max-width: 800px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.5; }
-  .pdf-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #12233D; padding-bottom: 16px; margin-bottom: 20px; }
-  .pdf-header h1 { font-size: 22px; margin: 0 0 4px; color: #12233D; }
+  .pdf-page { background: white; color: #222; width: 100%; max-width: 800px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 1.4; }
+  .pdf-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #12233D; padding-bottom: 12px; margin-bottom: 14px; }
+  .pdf-header h1 { font-size: 20px; margin: 0 0 3px; color: #12233D; letter-spacing: -0.01em; }
   .pdf-header .pdf-sub { color: #666; font-size: 13px; }
-  .pdf-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; margin-bottom: 20px; }
+  .pdf-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 20px; margin-bottom: 14px; }
   .pdf-info-row { display: flex; gap: 8px; }
   .pdf-info-row .lbl { color: #666; min-width: 120px; }
   .pdf-info-row .val { font-weight: 600; }
-  .pdf-section-title { font-size: 14px; font-weight: 700; color: #12233D; margin: 20px 0 10px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
+  .pdf-section-title { font-size: 12px; font-weight: 700; color: #12233D; margin: 14px 0 7px; border-bottom: 1.5px solid #12233D; padding-bottom: 4px; letter-spacing: 0.02em; }
   .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-  .pdf-table th, .pdf-table td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; font-size: 11px; }
+  .pdf-table th, .pdf-table td { border: 1px solid #ccc; padding: 3px 8px; text-align: left; font-size: 10px; }
   .pdf-table th { background: #12233D; color: white; font-weight: 600; }
-  .pdf-jfb-guide { background: #FFF8EA; border: 1px solid #F5DDA0; border-radius: 8px; padding: 12px 14px; margin-top: 16px; font-size: 11px; }
-  .pdf-jfb-guide h3 { margin: 0 0 6px; font-size: 13px; color: #6B5A1F; }
-  .pdf-jfb-guide p { margin: 4px 0; }
+  .pdf-jfb-guide { background: #FFF8EA; border: 1px solid #F5DDA0; border-radius: 6px; padding: 8px 10px; margin-top: 12px; font-size: 9px; line-height: 1.35; }
+  .pdf-jfb-guide h3 { margin: 0 0 3px; font-size: 10.5px; color: #6B5A1F; }
+  .pdf-jfb-guide p { margin: 2px 0; }
   .pdf-jfb-guide strong { color: #4A3D12; }
   .pdf-footer { margin-top: 24px; padding-top: 12px; border-top: 1px solid #ddd; color: #666; font-size: 10px; display: flex; justify-content: space-between; }
   @media print {
@@ -754,6 +754,12 @@
         <div class="pdf-info-row"><span class="lbl">Jordslutn.impedans:</span><span class="val">${anl.jordslutningsimpedans ? anl.jordslutningsimpedans + ' mΩ' : '–'}</span></div>
         <div class="pdf-info-row"><span class="lbl">Kortslutn.ström:</span><span class="val">${anl.kortslutningsstrom ? anl.kortslutningsstrom + ' kA' : '–'}</span></div>
       </div>
+      <div class="pdf-section-title">Utförd av</div>
+      <div class="pdf-info-grid">
+        <div class="pdf-info-row"><span class="lbl">Företag:</span><span class="val">${anl.foretag || '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Telefon:</span><span class="val">${anl.telefon || '–'}</span></div>
+        <div class="pdf-info-row"><span class="lbl">Kontakt:</span><span class="val">${anl.kontaktnamn || '–'}</span></div>
+      </div>
       <div class="pdf-jfb-guide">
         <h3>Jordfelsbrytare (JFB) – Guide</h3>
         <p><strong>Kontroll:</strong> Jordfelsbrytaren ska funktionsprovas <strong>var 6:e månad</strong> genom att trycka på testknappen. Den ska då omedelbart lösa ut.</p>
@@ -762,12 +768,6 @@
         <p>2. Om den löser ut direkt: skruva ur alla säkringar i centralen, slå till JFB igen, och skruva in säkringarna en och en tills JFB löser ut – då är felet i den gruppen.</p>
         <p>3. Om JFB löser ut även med alla säkringar urskruvade: felet är i den fasta installationen. Kontakta fackman.</p>
         <p>4. Om felet lokaliserats till en grupp: dra ur alla stickproppsanslutna apparater i den gruppen. Slå till JFB. Om den nu står kvar är felet i någon apparat.</p>
-      </div>
-      <div class="pdf-section-title">Utförd av</div>
-      <div class="pdf-info-grid">
-        <div class="pdf-info-row"><span class="lbl">Företag:</span><span class="val">${anl.foretag || '–'}</span></div>
-        <div class="pdf-info-row"><span class="lbl">Telefon:</span><span class="val">${anl.telefon || '–'}</span></div>
-        <div class="pdf-info-row"><span class="lbl">Kontakt:</span><span class="val">${anl.kontaktnamn || '–'}</span></div>
       </div>
       <div class="pdf-section-title" style="page-break-before:auto;">Gruppförteckning</div>${grupperHtml}
       <div class="pdf-footer"><div>Gruppschemat är en del av Bright Elteknik AB</div><div>Sida 1 av 1</div></div>
