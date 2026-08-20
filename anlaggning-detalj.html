@@ -378,6 +378,7 @@
     .pdf-info-grid { page-break-inside: avoid; break-inside: avoid; }
     .pdf-footer { page-break-inside: avoid; break-inside: avoid; }
     @page { margin: 12mm; size: A4; }
+    @page { margin-top: 12mm; margin-bottom: 12mm; }
   }
 
 </style>
@@ -753,7 +754,6 @@
         <div class="pdf-info-row"><span class="lbl">Jordslutn.impedans:</span><span class="val">${anl.jordslutningsimpedans ? anl.jordslutningsimpedans + ' mΩ' : '–'}</span></div>
         <div class="pdf-info-row"><span class="lbl">Kortslutn.ström:</span><span class="val">${anl.kortslutningsstrom ? anl.kortslutningsstrom + ' kA' : '–'}</span></div>
       </div>
-      <div class="pdf-section-title">Gruppförteckning</div>${grupperHtml}
       <div class="pdf-jfb-guide">
         <h3>Jordfelsbrytare (JFB) – Guide</h3>
         <p><strong>Kontroll:</strong> Jordfelsbrytaren ska funktionsprovas <strong>var 6:e månad</strong> genom att trycka på testknappen. Den ska då omedelbart lösa ut.</p>
@@ -769,6 +769,7 @@
         <div class="pdf-info-row"><span class="lbl">Telefon:</span><span class="val">${anl.telefon || '–'}</span></div>
         <div class="pdf-info-row"><span class="lbl">Kontakt:</span><span class="val">${anl.kontaktnamn || '–'}</span></div>
       </div>
+      <div class="pdf-section-title" style="page-break-before:auto;">Gruppförteckning</div>${grupperHtml}
       <div class="pdf-footer"><div>Gruppschemat är en del av Bright Elteknik AB</div><div>Sida 1 av 1</div></div>
     `;
     document.getElementById('pdf-modal-gruppschema').classList.add('active');
