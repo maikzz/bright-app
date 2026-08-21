@@ -406,6 +406,13 @@
   .grupp-ta-bort-rad { background: none; border: none; color: var(--text-faint); font-size: 14px; cursor: pointer; padding: 4px 6px; border-radius: 4px; line-height: 1; }
   .grupp-ta-bort-rad:hover { background: #FFF0F0; color: #C0362C; }
 
+    .grupp-rad-knappar { white-space: nowrap; }
+    .grupp-infoga-rad {
+      background: none; border: none; cursor: pointer;
+      font-size: 17px; line-height: 1; padding: 2px 6px;
+      color: #2E7D32; font-weight: 700;
+    }
+    .grupp-infoga-rad:hover { color: #1B5E20; }
 </style>
 </head>
 <body>
@@ -568,6 +575,7 @@
     if (!lista) return;
     const count = document.getElementById("grupp-count");
     if (count) count.textContent = grupper.length + " grupper";
+    grupper.sort((a, b) => (Number(a.sortering) || 0) - (Number(b.sortering) || 0));
     if (grupper.length === 0) {
       lista.innerHTML = '<p style="color:var(--text-faint);font-size:13px;text-align:center;padding:20px 0;">Inga grupper tillagda än. Klicka "+ Ny grupp" för att börja.</p>';
       return;
@@ -590,7 +598,7 @@
             <td><input class="inline-input inline-text" value="${(g.omfattning || '').replace(/"/g,'&quot;')}" data-field="omfattning" data-id="${g.id}" /></td>
             <td><input class="inline-input inline-nr" value="${g.markstrom ?? ''}" data-field="markstrom" data-id="${g.id}" type="number" min="0" /></td>
             <td><input class="inline-input inline-nr" value="${g.area ?? ''}" data-field="area" data-id="${g.id}" type="number" step="0.5" min="0" /></td>
-            <td><button class="grupp-ta-bort-rad" onclick="taBortGruppRad('${g.id}')" title="Ta bort">✕</button></td>
+            <td class="grupp-rad-knappar"><button class="grupp-infoga-rad" onclick="infogaGruppEfter('${g.id}')" title="Infoga rad under">+</button><button class="grupp-ta-bort-rad" onclick="taBortGruppRad('${g.id}')" title="Ta bort">✕</button></td>
           </tr>`).join('')}
         </tbody>
       </table>
@@ -714,19 +722,27 @@
     if (!omfattning) return;
 
     const { data, error } = window.__redigerarId
-      ? await supabaseClient.from("grupper").update({ anlaggning_id: anlaggningId, nummer, omfattning, markstrom, area })
-      .select()
-      .single().eq("id", window.__redigerarId)
-      : await supabaseClient.from("grupper").insert({ anlaggning_id: anlaggningId, nummer, omfattning, markstrom, area })
-      .select()
-      .single();
+      ? await supabaseClient.from("grupper")
+          .update({ nummer, omfattning, markstrom, area })
+          .eq("id", window.__redigerarId)
+          .select()
+          .single()
+      : await supabaseClient.from("grupper")
+          .insert({ anlaggning_id: anlaggningId, nummer, omfattning, markstrom, area, sortering: naestaSortering() })
+          .select()
+          .single();
 
     if (error) {
       alert("Kunde inte spara grupp: " + error.message);
       return;
     }
 
-    grupper.push(data);
+    if (window.__redigerarId) {
+      const iBef = grupper.findIndex(g => String(g.id) === String(data.id));
+      if (iBef !== -1) { grupper[iBef] = data; } else { grupper.push(data); }
+    } else {
+      grupper.push(data);
+    }
     renderGrupper();
 
     document.getElementById("input-nummer").value = nummer + 1;
@@ -773,6 +789,36 @@
     jfbTester.unshift(data);
     renderJfb();
     stangJfbModal();
+  }
+
+  // --- Infoga grupprad var som helst i listan ---
+  function naestaSortering() {
+    const max = grupper.reduce((m, g) => Math.max(m, Number(g.sortering) || 0), 0);
+    return max + 10;
+  }
+
+  async function infogaGruppEfter(id) {
+    const i = grupper.findIndex(g => String(g.id) === String(id));
+    if (i === -1) return;
+    const denna = Number(grupper[i].sortering) || 0;
+    const nasta = grupper[i + 1] ? Number(grupper[i + 1].sortering) : denna + 20;
+    const nySortering = (denna + nasta) / 2;
+
+    const { data, error } = await supabaseClient
+      .from("grupper")
+      .insert({ anlaggning_id: anlaggningId, omfattning: "", sortering: nySortering })
+      .select()
+      .single();
+
+    if (error) {
+      alert("Kunde inte infoga grupp: " + error.message);
+      return;
+    }
+
+    grupper.splice(i + 1, 0, data);
+    renderGrupper();
+    const nyRad = document.querySelector('.grupp-rad[data-id="' + data.id + '"] .inline-input');
+    if (nyRad) nyRad.focus();
   }
 
   async function laddaAnlaggning() {
@@ -834,7 +880,7 @@
       .from("grupper")
       .select("*")
       .eq("anlaggning_id", anlaggningId)
-      .order("nummer", { ascending: true });
+      .order("sortering", { ascending: true });
     grupper = gruppData || [];
     renderGrupper();
 
